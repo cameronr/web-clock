@@ -23,7 +23,7 @@
       }
 
       body {
-        background: #202020;
+        background: #000000;
         margin: 0; /* Reset default body margin */
       }
 
@@ -39,7 +39,7 @@
         left: 50%;
         top: 50%;
         transform: translate(-50%, -50%);
-        color: #4b8bcb;
+        /* Dynamic color is now set via JavaScript */
         /* text-shadow: */
         /*   0 0 20px rgba(179, 0, 0, 0.8), */
         /*   0 0 20px rgba(179, 0, 0, 0); */
@@ -82,9 +82,9 @@
   </head>
   <body>
     <div id="clock">
-      <p class="date">{{ date }}</p>
-      <p class="time">{{ time }}</p>
-      <p class="weather" v-if="weatherLoaded">
+      <p class="date" :style="{ color: timeColor }">{{ date }}</p>
+      <p class="time" :style="{ color: timeColor }">{{ time }}</p>
+      <p class="weather" :style="{ color: timeColor }" v-if="weatherLoaded">
         <span class="weather-icon"><i :class="weatherIcon"></i></span>
         <span>{{ weatherTemp }}</span>
       </p>
@@ -100,6 +100,7 @@
           weatherIcon: "",
           weatherLoaded: false,
           weatherLastUpdated: 0,
+          timeColor: "#FF8C00", // Default to orange
         },
       });
 
@@ -122,12 +123,65 @@
           "/" +
           zeroPadding(cd.getDate(), 2);
 
+        // Update the color based on time of day
+        clock.timeColor = getTimeBasedColor(cd);
+
         // Check if an hour has passed since last weather update
         var currentTime = cd.getTime();
         if (currentTime - clock.weatherLastUpdated >= 3600000) {
           // 3600000 ms = 1 hour
           fetchWeather();
         }
+      }
+
+      function getTimeBasedColor(date) {
+        // Calculate the progress through the day (0.0 to 1.0)
+        const hours = date.getHours();
+
+        const minutes = date.getMinutes();
+        const seconds = date.getSeconds();
+
+        // Convert to decimal time (0.0 to 1.0 representing progress through the day)
+        const dayProgress =
+          ((hours - 7) * 3600 + minutes * 60 + seconds) / 86400;
+
+        // Rainbow color sequence
+        // We'll use HSL color model where hue ranges from 0 to 360
+        // Morning starts with orange (around 30 degrees in HSL)
+        // Then follows the rainbow: yellow, green, blue, indigo, violet, and back to red
+
+        // Start with orange (30) in the morning and make a full 360 degree cycle
+        const hue = (dayProgress * 360 + 30) % 360;
+
+        // Calculate lightness based on time of day
+        // Normal lightness during the day
+        let lightness = 50; // Default lightness (50%)
+
+        // Get decimal time (hours + fraction of hour)
+        const decimalHours = hours + minutes / 60 + seconds / 3600;
+
+        // Dimming starts at 8pm (20:00)
+        if (decimalHours >= 20 && decimalHours < 24) {
+          // Linear decrease from 50% at 8pm to 15% at midnight
+          // 4-hour span from 8pm to midnight = 4 hours
+          const dimProgress = (decimalHours - 20) / 4;
+          lightness = 50 - dimProgress * 35; // Decrease from 50% to 15%
+        }
+        // Stay dim from midnight to 4am
+        else if (decimalHours >= 0 && decimalHours < 4) {
+          lightness = 20; // Dimmest setting (15%)
+        }
+        // Gradually increase from 4am to 6am
+        else if (decimalHours >= 4 && decimalHours < 6) {
+          // Linear increase from 15% at 4am to 50% at 6am
+          // 2-hour span from 4am to 6am = 2 hours
+          const brightProgress = (decimalHours - 4) / 2;
+          lightness = 15 + brightProgress * 35; // Increase from 15% to 50%
+        }
+
+        const saturation = 80; // 80%
+
+        return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
       }
 
       function zeroPadding(num, digit) {
@@ -161,21 +215,24 @@
         )
           .then((response) => response.json())
           .then((data) => {
+            clock.weatherLastUpdated = new Date().getTime();
             // Get current weather data
             const current = data.currently;
             const today = data.daily.data[0];
+            console.log(current);
 
             // Format temperature display with high/low from daily data
             const tempMin = Math.round(today.temperatureMin);
             const tempMax = Math.round(today.temperatureMax);
             const temp = Math.round(current.temperature);
-            clock.weatherTemp = `${temp}°F H: ${tempMax}°F`;
+            // clock.weatherTemp = `${temp}°F H: ${tempMax}°F`;
+            // clock.weatherTemp = `${tempMin}° / ${temp}° / ${tempMax}°`;
+            clock.weatherTemp = `${temp}° (${tempMin}°/${tempMax}°)`;
 
             // Set weather icon based on icon string from API
             clock.weatherIcon = getPirateWeatherIcon(current.icon);
 
             clock.weatherLoaded = true;
-            clock.weatherLastUpdated = new Date().getTime();
           })
           .catch((error) => {
             console.error("Error fetching weather data:", error);
