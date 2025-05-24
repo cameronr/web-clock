@@ -4,11 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Clock</title>
-    <!-- <link -->
-    <!--   href="https://fonts.googleapis.com/css?family=Share+Tech+Mono" -->
-    <!--   rel="stylesheet" -->
-    <!-- /> -->
-    <link rel="stylesheet" href="font.css" type="text/css" charset="utf-8" />
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
@@ -121,13 +116,11 @@
           ":" +
           zeroPadding(cd.getSeconds(), 2);
         clock.date =
-          zeroPadding(cd.getFullYear(), 4) +
-          "-" +
-          zeroPadding(cd.getMonth() + 1, 2) +
-          "-" +
-          zeroPadding(cd.getDate(), 2) +
+          week[cd.getDay()] +
           " " +
-          week[cd.getDay()];
+          zeroPadding(cd.getMonth() + 1, 2) +
+          "/" +
+          zeroPadding(cd.getDate(), 2);
 
         // Check if an hour has passed since last weather update
         var currentTime = cd.getTime();
