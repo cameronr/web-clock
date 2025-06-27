@@ -161,24 +161,24 @@
         // Get decimal time (hours + fraction of hour)
         const decimalHours = hours + minutes / 60 + seconds / 3600;
 
-        // Dimming starts at 8pm (20:00)
-        if (decimalHours >= 20 && decimalHours < 24) {
-          // Linear decrease from 50% at 8pm to 15% at midnight
-          // 4-hour span from 8pm to midnight = 4 hours
-          const dimProgress = (decimalHours - 20) / 4;
-          lightness = 50 - dimProgress * 35; // Decrease from 50% to 15%
-        }
-        // Stay dim from midnight to 4am
-        else if (decimalHours >= 0 && decimalHours < 4) {
-          lightness = 20; // Dimmest setting (15%)
-        }
-        // Gradually increase from 4am to 6am
-        else if (decimalHours >= 4 && decimalHours < 6) {
-          // Linear increase from 15% at 4am to 50% at 6am
-          // 2-hour span from 4am to 6am = 2 hours
-          const brightProgress = (decimalHours - 4) / 2;
-          lightness = 15 + brightProgress * 35; // Increase from 15% to 50%
-        }
+        // // Dimming starts at 8pm (20:00)
+        // if (decimalHours >= 20 && decimalHours < 24) {
+        //   // Linear decrease from 50% at 8pm to 15% at midnight
+        //   // 4-hour span from 8pm to midnight = 4 hours
+        //   const dimProgress = (decimalHours - 20) / 4;
+        //   lightness = 50 - dimProgress * 35; // Decrease from 50% to 15%
+        // }
+        // // Stay dim from midnight to 4am
+        // else if (decimalHours >= 0 && decimalHours < 4) {
+        //   lightness = 20; // Dimmest setting (15%)
+        // }
+        // // Gradually increase from 4am to 6am
+        // else if (decimalHours >= 4 && decimalHours < 6) {
+        //   // Linear increase from 15% at 4am to 50% at 6am
+        //   // 2-hour span from 4am to 6am = 2 hours
+        //   const brightProgress = (decimalHours - 4) / 2;
+        //   lightness = 15 + brightProgress * 35; // Increase from 15% to 50%
+        // }
 
         const saturation = 80; // 80%
 
